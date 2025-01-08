@@ -2,7 +2,7 @@
 Tutorial sobre o uso do framework Flask / Python elaborado para a disciplina de Programação Web, do curso Técnico Integrado em Redes de Computadores do IFSP Campus Pirituba.
 
 
-**Autores:** Luiz Roberto Albano Junior e Renato Cristiano Montanher.
+**Autores:** [Luiz Albano](https://github.com/prof-LuizAlbano) e [Renato  Montanher](https://github.com/RenatoMontanher).
 
 São Paulo, 2025. Versão: 1.0 (Janeiro/2025).
 
@@ -99,3 +99,31 @@ Para executarmos nossa aplicação, em uma tela de terminal com o cursor present
 <br>
 
 No comando acima substitua **[nome_arquivo]** pelo nome do arquivo inicial de sua aplicação, sem sua extensão. Em nosso tutorial, o nome do arquivo é app. Também adicionamos ao final do comando o parâmetro **`–debug`** para que nosso código seja recarregado automaticamente quando houver mudanças. Isto facilita durante o processo de desenvolvimento, pois não precisamos ter que parar o servidor e reiniciar novamente em cada mudança de arquivo.
+
+## 2. Organizando a aplicação
+
+Manter uma boa estrutura e organização dos arquivos torna o projeto mais legível e de fácil manutenção. Desta forma apresentamos uma estrutura de arquivos e diretórios que utilizaremos neste tutorial.
+
+```
+|-- ifsp-flask-tutorial
+|   +-- static
+|   |   +-- css
+|   |   |   |-- <arquivos de estilos> 
+|   |   +-- images
+|   |   |   |-- <imagens> 
+|   |   +-- js
+|   |   |   |-- <scripts javascript> 
+|   +-- templates
+|   |   |-- <arquivos de template> 
+|   |-- app.py
+```
+
+* O diretório **ifsp-flask-tutorial** é o diretório de nossa aplicação.
+* O diretório **static** reúne os arquivos estáticos da aplicação que serão referenciados pelos códigos HTML. Dentro deste diretório, foram criados outros três diretórios, sendo eles:
+    * **css:** para armazenar os arquivos de estilos utilizados pela aplicação
+    * **images:** para armazenar as imagens
+    * **js:** para armazenar os scripts em linguagem javascript, responsáveis pelo controle da interação e elementos HTML.
+* O diretório **templates** irá abrigar os arquivos contendo códigos HTML que serão utilizados pela aplicação para a renderização dos conteúdos.
+* O arquivo **`app.py`** contém os códigos já descritos na seção anterior.
+
+

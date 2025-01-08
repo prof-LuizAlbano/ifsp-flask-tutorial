@@ -22,7 +22,10 @@ O **virtualenv** é um recurso do Python que cria um ambiente virtual isolado pa
 **Instalando o virtualenv**
 
 Para instalar o virtualenv no Windows, abra uma janela de terminal e digite o seguinte comando:
-pip install virtualenv
+
+`pip install virtualenv`
+
+
 <br>
 
 

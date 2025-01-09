@@ -126,4 +126,43 @@ Manter uma boa estrutura e organização dos arquivos torna o projeto mais legí
 * O diretório **templates** irá abrigar os arquivos contendo códigos HTML que serão utilizados pela aplicação para a renderização dos conteúdos.
 * O arquivo **`app.py`** contém os códigos já descritos na seção anterior.
 
+## 3. Rotas
+
+As rotas são um conceito importante em um sistema web. Elas determinam a maneira de se chegar a um determinado lugar da aplicação. Se quisermos que os usuários acessem uma página de login, precisamos determinar uma rota para a página de login. Se precisarmos que um usuário chegue até a página de registro, teremos uma rota para ela e assim por diante. 
+
+Podemos definir, basicamente, rotas de forma estática ou dinâmica.
+
+Definimos uma rota da seguinte maneira:
+
+```
+@app.route("/caminho")
+def nome_funcao():
+    return "Aqui entrará o código HTML da tela"
+```
+
+* **@app.route:** notação utilizada para dizer que estamos criando uma rota. Dentro do parênteses dessa notação precisamos colocar o nome que daremos para ela. 
+* **def nome_funcao:** cada rota ao ser acionada precisa ter uma def que executará as devidas ações.
+  
+**Rotas dinâmicas**
+
+Um rota pode também pode receber parâmetros, que são valores dinâmicos. Em uma tela para exibição de um produto, podemos acessar as informações deste produto através da rota correspondente e um código correspondente ao produto, por exemplo.
+
+Veja um exemplo de definição de uma rota dinâmica:
+
+```
+@app.route("/ver/produto/<int:id>")
+def ver_produto(id):
+    return f"O ID deste produto é {id}"
+```
+
+No exemplo anterior a página acessada teria a seguinte URL: `http://127.0.0.1:5000/ver/produto/123`.
+Para adicionar criar uma rota dinâmica, basta adicionar uma seção **`<nome_varialvel>`** no nome da URL definida. A função que irá responder à rota deve declarar o **nome_variavel**, como um parâmetro. Opcionalmente a seção de variável pode declarar o tipo de argumento da seguinte maneira: **`<tipo:nome_variavel>`**.
+
+Tipos de variáveis:
+* string: (padrão) aceita qualquer texto sem barra
+* int: aceita inteiros positivos
+* float: aceita valores de ponto flutuante positivos
+* path: como uma string, porém aceita barras
+* uuid: aceita strings UUID
+
 

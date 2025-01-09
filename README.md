@@ -100,12 +100,66 @@ Para executarmos nossa aplicação, em uma tela de terminal com o cursor present
 
 No comando acima substitua **[nome_arquivo]** pelo nome do arquivo inicial de sua aplicação, sem sua extensão. Em nosso tutorial, o nome do arquivo é app. Também adicionamos ao final do comando o parâmetro **`–debug`** para que nosso código seja recarregado automaticamente quando houver mudanças. Isto facilita durante o processo de desenvolvimento, pois não precisamos ter que parar o servidor e reiniciar novamente em cada mudança de arquivo.
 
-## 2. Organizando a aplicação
+## 2. Sobre a aplicação de exemplo
+
+Para fins didáticos, iremos desenvolver uma pequena aplicação do tipo “Agenda de Contatos”. Nesta seção descreveremos as principais funcionalidades para melhor compreensão dos passos de desenvolvimento apresentados nas seções seguintes.
+
+Nossa Agenda de Contatos terá as seguintes funcionalidades:
+* **Lista de contatos:** página inicial da aplicação. Deverá listar, em ordem alfabética, a lista de contatos cadastradas em nossa agenda, exibindo o nome do contato, seu telefone, data de nascimento e endereço de e-mail;
+* **Adicionar contato:** deve apresentar um formulário contendo os seguintes campos: nome, telefone, data de nascimento e e-mail. Ao enviar os dados do formulário, nossa aplicação deve inserir uma nova entrada na tabela do banco de dados;
+* **Editar contato:** a partir da lista de contatos, um usuário pode selecionar um cadastro para editar (atualizar) informações. Ao selecionar a edição de um contato, deve ser exibido um formulário (igual ao formulário de adição de contato), porém os campos devem estar preenchidos com os dados do contato que será atualizado. Ao enviar os dados do formulário, nossa aplicação deverá editar o respectivo registro na tabela do banco de dados;
+* **Visualizar contato:** a partir da lista de contatos, um usuário pode selecionar um cadastro para visualizar suas informações. Ao selecionar a visualização de um contato, deve ser exibida uma página contendo as informações do contato selecionado;
+* **Excluir contato:** a partir da lista de contatos, um usuário pode selecionar um cadastro para excluir de seus contatos. Ao selecionar um registro, a aplicação deve confirmar a exclusão, e se confirmada, o registro deverá ser excluído da tabela no banco de dados. Ao finalizar a exclusão, a lista de contatos deve ser exibida novamente, com a lista de contatos atualizada.
+  
+Para o desenvolvimento desta aplicação vamos criar um banco de dados baseado no SQLite. Prossiga com os passos abaixo para realizar a criação do banco de dados:
+
+**Passo 1:** crie um diretório chamado **`db/`** dentro do diretório da aplicação.
+
+**Passo 2:** no diretório **`db/`**, crie um arquivo chamado **`schema.sql`** e cole o código abaixo.
+```
+DROP TABLE IF EXISTS contatos;
+
+CREATE TABLE contatos (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  nome VARCHAR(50) NOT NULL,
+  telefone VARCHAR(20),
+  data_nascimento DATE,
+  email VARCHAR(100),
+  data_cadastro TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+```
+
+**Passo 3:** agora no diretório raíz da aplicação, crie um arquivo chamado **`init_db.py`** e cole o código abaixo.
+
+```
+import sqlite3
+
+connection = sqlite3.connect('db/agenda.db')
+
+with open('db/schema.sql') as f:
+    connection.executescript(f.read())
+
+cur = connection.cursor()
+
+connection.commit()
+connection.close()
+```
+
+**Passo 4:** em uma janela de terminal, com o cursor direcionado para o diretório raíz da aplicação execute o script criado no passo anterior com o interpretador do Python:
+
+`python init_db.py`
+
+Após realizar os passos acima sua aplicação deverá conter, dentro do diretório **`db/`**, um novo arquivo chamado **`agenda.db`**. Este arquivo armazenará os dados de nossa aplicação, armazenando os valores dentro da tabela contatos.
+
+## 3. Organizando a aplicação
 
 Manter uma boa estrutura e organização dos arquivos torna o projeto mais legível e de fácil manutenção. Desta forma apresentamos uma estrutura de arquivos e diretórios que utilizaremos neste tutorial.
 
 ```
 |-- ifsp-flask-tutorial
+|   +-- db
+|   |   |-- agenda.db
+|   |   |-- schema.sql
 |   +-- static
 |   |   +-- css
 |   |   |   |-- <arquivos de estilos> 
@@ -116,17 +170,22 @@ Manter uma boa estrutura e organização dos arquivos torna o projeto mais legí
 |   +-- templates
 |   |   |-- <arquivos de template> 
 |   |-- app.py
+|   |-- init_db.py
 ```
 
 * O diretório **ifsp-flask-tutorial** é o diretório de nossa aplicação.
+* O diretório **db** contém dois arquivos, sendo o arquivo agenda.db nosso banco de dados e o arquivo schema.sql contendo as instruções SQL para criação da tabela contatos.
 * O diretório **static** reúne os arquivos estáticos da aplicação que serão referenciados pelos códigos HTML. Dentro deste diretório, foram criados outros três diretórios, sendo eles:
     * **css:** para armazenar os arquivos de estilos utilizados pela aplicação
     * **images:** para armazenar as imagens
     * **js:** para armazenar os scripts em linguagem javascript, responsáveis pelo controle da interação e elementos HTML.
 * O diretório **templates** irá abrigar os arquivos contendo códigos HTML que serão utilizados pela aplicação para a renderização dos conteúdos.
-* O arquivo **`app.py`** contém os códigos já descritos na seção anterior.
+* No diretório raíz de nossa aplicação há dois arquivos Python:
+    * **`app.py`**: nosso ponto de partida da aplicação, ontém os códigos já descritos na seção anterior;
+    * **`init_db.py`**: script Python para criação do banco de dados. Deve ser executando apenas uma vez, antes do prosseguimento deste tutorial.
 
-## 3. Rotas
+
+## 4. Rotas
 
 As rotas são um conceito importante em um sistema web. Elas determinam a maneira de se chegar a um determinado lugar da aplicação. Se quisermos que os usuários acessem uma página de login, precisamos determinar uma rota para a página de login. Se precisarmos que um usuário chegue até a página de registro, teremos uma rota para ela e assim por diante. 
 
@@ -165,7 +224,7 @@ Tipos de variáveis:
 * path: como uma string, porém aceita barras
 * uuid: aceita strings UUID
 
-## 4. Templates
+## 5. Templates
 
 Todas as rotas são associadas a uma função que retorna o conteúdo do processamento. Retornar todo o código HTML dentro de uma função aumenta consideravelmente as linhas de código e dificulta a manutenção de um arquivo.
 

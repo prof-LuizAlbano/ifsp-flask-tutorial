@@ -184,18 +184,18 @@ Vejamos um exemplo de uso:
 
 ```
 from flask import render_template
-@app.route(“/exemplo-template”)
+@app.route("/exemplo-template")
 def exemplo_template():
-    return render_template(“exemplo.html”)
+    return render_template("exemplo.html")
 ```
 
 **Passando valores dinâmicos para um template**
 
 ```
 from flask import render_template
-@app.route(“/exemplo-template-2”)
+@app.route("/exemplo-template-2")
 def exemplo_template2():
-    return render_template(“exemplo2.html”, teste=”Este é um valor que foi repassado ao template”)
+    return render_template("exemplo2.html", teste="Este é um valor que foi repassado ao template")
 ```
 
 No exemplo acima o valor exibido é o valor contido na variável **teste**, passada como argumento na função **render_template**. Para que o valor seja impresso na página, no arquivo de template é necessário inserir o nome da variável entre duas chaves:

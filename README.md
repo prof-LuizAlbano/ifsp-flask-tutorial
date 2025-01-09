@@ -165,4 +165,51 @@ Tipos de variáveis:
 * path: como uma string, porém aceita barras
 * uuid: aceita strings UUID
 
+## 4. Templates
 
+Todas as rotas são associadas a uma função que retorna o conteúdo do processamento. Retornar todo o código HTML dentro de uma função aumenta consideravelmente as linhas de código e dificulta a manutenção de um arquivo.
+
+Uma boa prática é a utilização de templates.
+Templates são arquivos estáticos que podem conter espaços (placeholders) para dados dinâmicos. Um arquivo de template é renderizado (processado) com dados específicos para produzir o documento final.
+
+Estes arquivos, por padrão, são armazenados no diretório **templates/** de sua aplicação. Para melhorar a organização, dependendo do tamanho de sua aplicação, os arquivos também podem ser organizados em subdiretórios.
+
+Os arquivos de template são arquivos HTML que podem conter espaços (placeholders) delimitados por:
+* {{ }} - expressões que produzem saídas no documento, funcionando como um print do Python.
+* {% %} - expressões de controle de fluxo ou funções (como if, for, etc).
+
+Para utilizarmos templates devemos adicionar a biblioteca **render_template**, que adiciona a função de mesmo nome que retorna o resultado do processamento do arquivo de template como um arquivo estático.
+
+Vejamos um exemplo de uso:
+
+```
+from flask import render_template
+@app.route(“/exemplo-template”)
+def exemplo_template():
+    return render_template(“exemplo.html”)
+```
+
+**Passando valores dinâmicos para um template**
+
+```
+from flask import render_template
+@app.route(“/exemplo-template-2”)
+def exemplo_template2():
+    return render_template(“exemplo2.html”, teste=”Este é um valor que foi repassado ao template”)
+```
+
+No exemplo acima o valor exibido é o valor contido na variável **teste**, passada como argumento na função **render_template**. Para que o valor seja impresso na página, no arquivo de template é necessário inserir o nome da variável entre duas chaves:
+
+```
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flask - Exemplo 01 do uso de templates</title>
+</head>
+<body>
+    <h1>{{teste}}</h1>
+</body>
+</html>
+```

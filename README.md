@@ -224,6 +224,35 @@ Tipos de variáveis:
 * path: como uma string, porém aceita barras
 * uuid: aceita strings UUID
 
+Para nosso tutorial vamos criar 5 (cinco) rotas. Vamos inserí-las no arquivo **`app.py`**. Por ora iremos apenas criar as rotas e ao longo deste tutorial, faremos as devidas alterações, incluindo as ações que nossa aplicação deverá realizar.
+
+```
+from flask import Flask
+
+app = Flask(__name__)
+
+@app.route("/")
+@app.route("/listar")
+def listar_contatos():
+    return "<h1>Lista de Contatos</h1>"
+
+@app.route("/adicionar")
+def adicionar_contato():
+    return "<h1>Adicionar Contato</h1>"
+
+@app.route("/visualizar/<int:id_contato>")
+def visualizar_contato(id_contato):
+    return f"<h1>Visualizar Contato: {id_contato}</h1>"
+
+@app.route("/editar/<int:id_contato>")
+def editar_contato(id_contato):
+    return f"<h1>Editar Contato: {id_contato}</h1>"
+
+@app.route("/excluir/<int:id_contato>")
+def excluir_contato(id_contato):
+    return f"<h1>Excluir Contato: {id_contato}</h1>"
+```
+
 ## 5. Templates
 
 Todas as rotas são associadas a uma função que retorna o conteúdo do processamento. Retornar todo o código HTML dentro de uma função aumenta consideravelmente as linhas de código e dificulta a manutenção de um arquivo.

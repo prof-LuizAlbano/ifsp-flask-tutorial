@@ -4,24 +4,26 @@ from flask import render_template
 app = Flask(__name__)
 
 @app.route("/")
-def hello_world():
-    return "<p>Hello, World!</p>"
+@app.route("/listar")
+def listar_contatos():
+    return "<h1>Lista de Contatos</h1>"
 
 
-@app.route("/caminho")
-def nome_funcao():
-    return "Aqui entrará o código HTML da tela"
+@app.route("/adicionar")
+def adicionar_contato():
+    return "<h1>Adicionar Contato</h1>"
 
 
-@app.route("/ver/produto/<int:id>")
-def ver_produto(id):
-    return f"O ID deste produto é {id}"
+@app.route("/visualizar/<int:id_contato>")
+def visualizar_contato(id_contato):
+    return f"<h1>Visualizar Contato: {id_contato}</h1>"
 
 
-@app.route("/exemplo-template")
-def exemplo_template():
-    return render_template("exemplo.html")
+@app.route("/editar/<int:id_contato>")
+def editar_contato(id_contato):
+    return f"<h1>Editar Contato: {id_contato}</h1>"
 
-@app.route("/exemplo-template-2")
-def exemplo_template2():
-    return render_template("exemplo2.html", teste="Este é um valor que foi repassado ao template")
+
+@app.route("/excluir/<int:id_contato>")
+def excluir_contato(id_contato):
+    return f"<h1>Excluir Contato: {id_contato}</h1>"

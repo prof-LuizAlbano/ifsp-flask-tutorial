@@ -1,5 +1,5 @@
 from flask import Flask
-from flask import render_template
+from flask import render_template, request
 
 app = Flask(__name__)
 
@@ -9,8 +9,12 @@ def listar_contatos():
     return render_template("listar-contatos.html")
 
 
-@app.route("/adicionar")
+@app.route("/adicionar", methods=['POST', 'GET'])
 def adicionar_contato():
+    if request.method == 'POST':
+        #Aqui iremos tratar os dados e salvá-los no banco de dados.
+        pass
+
     return render_template("formulario-contato.html")
 
 
@@ -19,8 +23,12 @@ def visualizar_contato(id_contato):
     return render_template("visualizar-contato.html")
 
 
-@app.route("/editar/<int:id_contato>")
+@app.route("/editar/<int:id_contato>", methods=['POST', 'GET'])
 def editar_contato(id_contato):
+    if request.method == 'POST':
+        #Aqui iremos tratar os dados e salvá-los no banco de dados.
+        pass
+    
     return render_template("formulario-contato.html")
 
 

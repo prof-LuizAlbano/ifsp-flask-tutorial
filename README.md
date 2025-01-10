@@ -544,3 +544,95 @@ Formulário
 {% endblock %}
 ```
 
+## 6. Formulários e Requisições
+
+Em aplicações web é essencial manipular as informações que um usuário envia ao servidor. O framework Flask fornece estas informações através de um objeto chamado **request**. 
+
+Para utilizarmos é necessário a importação da biblioteca **request**:
+
+`from flask import request`
+
+No protocolo HTTP temos disponíveis alguns métodos para requisição dos dados, como HEAD, PUT, DELETE, GET e POST, sendo os dois últimos, os métodos que iremos utilizar em nosso exemplo. Uma explicação mais detalhada sobre os métodos HTTP pode ser encontrada em: https://developer.mozilla.org/pt-BR/docs/Web/HTTP/Methods
+
+Em formulários, geralmente, utilizamos o método post para envio das informações. Neste método, basicamente, o navegador monta um pacote de requisição e insere os valores e variáveis no corpo deste pacote, que será recebido pelo servidor. Nossa aplicação, deverá receber estes dados e processá-los, para adicionar um novo usuário, ou editar os dados de um já existente.
+
+Em uma função podemos obter o método de envio das informações, através do atributo **method**, presente no objeto **request**. Já os dados enviados por um formulário, que utilize o método POST podem ser acessados pelo atributo **form**.
+
+Veja um exemplo a seguir:
+
+```
+@app.route('/login', methods=['POST', 'GET'])
+def login():
+    error = None
+    if request.method == 'POST':
+        if valid_login(request.form['username'],
+                       request.form['password']):
+            return log_the_user_in(request.form['username'])
+        else:
+            error = 'Invalid username/password'
+    # the code below is executed if the request method
+    # was GET or the credentials were invalid
+    return render_template('login.html', error=error)
+```
+
+No exemplo acima, a rota **`/login`** é configurada para aceitar requisições aos métodos POST e GET. A função destinada a esta rota, verifica se a requisição recebida é do tipo POST, e se verdadeira, confere os dados de login repassando à função **`valid_login`** os dados enviados pelo usuário **`request.form['username']`** e **`request.form[password']`**.
+
+Vamos agora aplicar estes conceitos ao nosso tutorial.
+
+Primeiro, vamos editar o arquivo de template **`formulario-contato.html`** para nomearmos os campos do formulário, que serão os nomes que utilizaremos como chaves no atributo form. 
+
+Localize os campos input e insira a propriedade name, como nas linhas abaixo:
+
+```
+<input type="text" class="form-control" id="form_input_Nome" name="nome">
+
+<input type="text" class="form-control" id="form_input_Telefone" name="telefone">
+
+<input type="text" class="form-control" id="form_input_DataNascimento" name="data_nascimento">
+
+<input type="email" class="form-control" id="form_input_Email" name="email">
+```
+
+Agora vamos alterar o arquivo **`app.py`**, para incluir a chamada à biblioteca request e inserir nas rotas **`/adicionar`** e **`/editar`** os comandos para leitura dos dados enviados.
+
+O arquivo **`app.py`** ficará assim:
+
+```
+from flask import Flask
+from flask import render_template, request
+
+app = Flask(__name__)
+
+@app.route("/")
+@app.route("/listar")
+def listar_contatos():
+    return render_template("listar-contatos.html")
+
+
+@app.route("/adicionar", methods=['POST', 'GET'])
+def adicionar_contato():
+    if request.method == 'POST':
+        #Aqui iremos tratar os dados e salvá-los no banco de dados.
+        pass
+
+    return render_template("formulario-contato.html")
+
+
+@app.route("/visualizar/<int:id_contato>")
+def visualizar_contato(id_contato):
+    return render_template("visualizar-contato.html")
+
+
+@app.route("/editar/<int:id_contato>", methods=['POST', 'GET'])
+def editar_contato(id_contato):
+    if request.method == 'POST':
+        #Aqui iremos tratar os dados e salvá-los no banco de dados.
+        pass
+    
+    return render_template("formulario-contato.html")
+
+
+@app.route("/excluir/<int:id_contato>")
+def excluir_contato(id_contato):
+    return f"<h1>Excluir Contato: {id_contato}</h1>"
+```

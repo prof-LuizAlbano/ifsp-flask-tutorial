@@ -6,22 +6,22 @@ app = Flask(__name__)
 @app.route("/")
 @app.route("/listar")
 def listar_contatos():
-    return "<h1>Lista de Contatos</h1>"
+    return render_template("listar-contatos.html")
 
 
 @app.route("/adicionar")
 def adicionar_contato():
-    return "<h1>Adicionar Contato</h1>"
+    return render_template("formulario-contato.html")
 
 
 @app.route("/visualizar/<int:id_contato>")
 def visualizar_contato(id_contato):
-    return f"<h1>Visualizar Contato: {id_contato}</h1>"
+    return render_template("visualizar-contato.html")
 
 
 @app.route("/editar/<int:id_contato>")
 def editar_contato(id_contato):
-    return f"<h1>Editar Contato: {id_contato}</h1>"
+    return render_template("formulario-contato.html")
 
 
 @app.route("/excluir/<int:id_contato>")

@@ -264,7 +264,7 @@ Estes arquivos, por padrão, são armazenados no diretório **templates/** de su
 
 Os arquivos de template são arquivos HTML que podem conter espaços (placeholders) delimitados por:
 * {{ }} - expressões que produzem saídas no documento, funcionando como um print do Python.
-* {% %} - expressões de controle de fluxo ou funções (como if, for, etc).
+* {% %} - expressões de controle de fluxo ou funções (como if, for, etc). Este placeholder também é utilizado para comandos como **extends**, quando inserimos outro arquivo HTML que será estendido, e **block** para definirmos blocos de conteúdos que podem ser substituídos, em outros arquivos.
 
 Para utilizarmos templates devemos adicionar a biblioteca **render_template**, que adiciona a função de mesmo nome que retorna o resultado do processamento do arquivo de template como um arquivo estático.
 
@@ -301,3 +301,246 @@ No exemplo acima o valor exibido é o valor contido na variável **teste**, pass
 </body>
 </html>
 ```
+
+**Templates do tutorial**
+
+Para nosso tutorial vamos adotar o uso de templates. Para começarmos, vamos criar um arquivo chamado **`base.html`**. Lembrando que os arquivos de template devem ser salvos no diretório **`templates/`**. Este arquivo será uma página contendo o cabeçalho e rodapé da aplicação e também dois blocos:
+* **page_title**: para definirmos o título da página
+* **page_content**: para inserirmos a parte de conteúdo da página conforme a rota.
+
+**Conteúdo do arquivo base.html:**
+
+```
+<!doctype html>
+<html lang="pt-br">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="Luiz Albano and Renato Montanher">
+    <title>Agenda de Contatos | {% block page_title %}Lista de Contatos{% endblock %}</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <link href="static/css/agenda.css" rel="stylesheet">
+</head>
+<body>           
+    <main>
+        <div class="container py-4">
+            <header class="pb-3 mb-4 border-bottom">
+                <a href="/" class="d-flex align-items-center text-body-emphasis text-decoration-none">
+                    <svg width="48px" height="48px" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+                        <title>contacts-solid</title>
+                        <g id="Layer_2" data-name="Layer 2">
+                          <g id="invisible_box" data-name="invisible box">
+                            <rect width="48" height="48" fill="none"/>
+                          </g>
+                          <g id="Q3_icons" data-name="Q3 icons">
+                            <g>
+                              <path d="M14,31.7V34H28V31.7a15.3,15.3,0,0,0-14,0Z"/>
+                              <circle cx="21" cy="17" r="3"/>
+                              <path d="M36,3H6A2,2,0,0,0,4,5V43a2,2,0,0,0,2,2H36a2,2,0,0,0,2-2V5A2,2,0,0,0,36,3ZM21,10a7,7,0,1,1-7,7A7,7,0,0,1,21,10ZM32,36a2,2,0,0,1-2,2H12a2,2,0,0,1-2-2V29.4l.9-.6a19.6,19.6,0,0,1,20.2,0l.9.6Z"/>
+                              <path d="M42,19H40V29h2a2,2,0,0,0,2-2V21A2,2,0,0,0,42,19Z"/>
+                              <path d="M42,31H40V41h2a2,2,0,0,0,2-2V33A2,2,0,0,0,42,31Z"/>
+                              <path d="M42,7H40V17h2a2,2,0,0,0,2-2V9A2,2,0,0,0,42,7Z"/>
+                            </g>
+                          </g>
+                        </g>
+                      </svg>
+
+                    <span class="fs-4 ms-3 fw-bold">Agenda de Contatos</span>
+                </a>
+            </header>
+
+            {% block page_content %}{% endblock %}
+
+            <footer class="pt-3 mt-4 text-body-secondary border-top">
+                &copy; IFSP - Técnico em Redes de Computadores: Programação Web - 2024/2025
+            </footer>
+        </div>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+    <script src="static/js/agenda.js"></script>
+</body>
+</html>
+```
+
+Vamos também construir os arquivos de template que utilizaremos nas rotas apresentadas anteriormente. Vamos começar com a rota inicial que faz a listagem dos contatos.
+
+Crie um arquivo chamado **`listar-contatos.html`**. Neste arquivo vamos definir conteúdos para os blocos **page_title** e **page_content**, sendo este último, um bloco contendo os códigos HTML que exibem uma tabela contendo as informações dos contatos cadastrados (nesta primeira versão, temos apenas um exemplo e não criamos a interação com os dados) e um botão para adicionar um novo contato. 
+
+No início do arquivo devemos importar o arquivo **`base.html`** através do comando **`{% extends 'base.html' %}`**. Este procedimento ocorrerá em todos os arquivos das demais rotas.
+
+**Conteúdo do arquivo listar-contatos.html:**
+
+```
+{% extends 'base.html' %}
+
+{% block page_title %}
+Lista de Contatos
+{% endblock %}
+
+{% block page_content %}
+
+<div class="container-fluid py-4">
+    <div class="d-flex align-self-center">
+        <h1>Lista de Contatos</h1>
+        <a href="/adicionar" class="ms-auto py-3 btn btn-success fw-bold">[+] Adicionar Contato</a>
+    </div>
+
+    <div class="row py-5">
+        <table class="table table-hover table-striped ">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Nome</th>
+                    <th>Telefone</th>
+                    <th>Data de Nascimento</th>
+                    <th>E-mail</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>0</td>
+                    <td>Nome do contato</td>
+                    <td>(00) 0000-0000</td>
+                    <td>00/00/0000</td>
+                    <td>nome@provedor.com.br</td>
+                    <td>
+                        <a href="/visualizar/0" class="text-dark">Visualizar</a> |
+                        <a href="/editar/0" class="text-dark">Editar</a> |
+                        <a href="/excluir/0" class="text-danger delete-item">Excluir</a>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+</div>
+
+{% endblock %}
+```
+
+**Conteúdo do arquivo visualizar-contato.html:**
+
+```
+{% extends 'base.html' %}
+
+{% block page_title %}
+Visualização de dados
+{% endblock %}
+
+{% block page_content %}
+
+<div class="container-fluid py-4">
+    <div class="d-flex align-self-center">
+        <h1>Dados do Contato</h1>
+        <a href="/listar" class="ms-auto py-3 btn btn-dark fw-bold">&lt;- Voltar</a>
+    </div>
+
+    <div class="row py-5">
+        <table class="table table-hover table-striped ">
+            <tbody>
+                <tr>
+                    <th width="200">#</th>
+                    <td>0</td>
+                </tr>
+                <tr>
+                    <th>Nome</th>
+                    <td>Nome do contato</td>
+                </tr>
+                <tr>
+                    <th>Telefone</th>
+                    <td>(00) 0000-0000</td>
+                </tr>
+                <tr>
+                    <th>Data de Nascimento</th>
+                    <td>00/00/0000</td>
+                </tr>
+                <tr>
+                    <th>E-mail</th>
+                    <td>nome@provedor.com.br</td>
+                </tr>
+                <tr>
+                    <th>Data de Cadastro</th>
+                    <td>00/00/0000 00:00:00</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div class="d-flex">
+            <a href="/editar/0" class="btn btn-success">Editar</a>
+            <a href="/excluir/0" class="btn btn-danger ms-2 delete-item">Excluir</a>
+            <a href="/listar" class="ms-auto btn btn-dark fw-bold">&lt;- Voltar</a>
+        </div>
+    </div>
+
+</div>
+
+{% endblock %}
+```
+
+**Conteúdo do arquivo formulario-contato.html:**
+
+Este arquivo será utilizado tanto para a rota de adicionar, quanto para a rota de editar, pois se utilizam do mesmo formulário de campos.
+
+```
+{% extends 'base.html' %}
+
+{% block page_title %}
+Formulário
+{% endblock %}
+
+{% block page_content %}
+
+<div class="container-fluid py-4">
+    <div class="d-flex align-self-center">
+        <h1>Adicionar/Editar Contato</h1>
+        <a href="/listar" class="ms-auto py-3 btn btn-dark fw-bold">&lt;- Voltar</a>
+    </div>
+
+    <div class="row py-5">
+        <form action="#" method="post">
+            <div class="row mb-3">
+                <label for="form_input_Nome" class="col-sm-2 col-form-label">Nome</label>
+                <div class="col-sm-10">
+                    <input type="text" class="form-control" id="form_input_Nome">
+                </div>
+            </div>
+
+            <div class="row mb-3">
+                <label for="form_input_Telefone" class="col-sm-2 col-form-label">Telefone</label>
+                <div class="col-sm-10">
+                    <input type="text" class="form-control" id="form_input_Telefone">
+                </div>
+            </div>
+
+            <div class="row mb-3">
+                <label for="form_input_DataNascimento" class="col-sm-2 col-form-label">Data de Nascimento</label>
+                <div class="col-sm-10">
+                    <input type="text" class="form-control" id="form_input_DataNascimento">
+                </div>
+            </div>
+
+            <div class="row mb-3">
+                <label for="form_input_Email" class="col-sm-2 col-form-label">Email</label>
+                <div class="col-sm-10">
+                    <input type="email" class="form-control" id="form_input_Email">
+                </div>
+            </div>
+
+            <div class="d-flex">
+                <label class="col-sm-2 ms-1 col-form-label">&nbsp;</label>
+                <button type="submit" class="btn btn-success">Salvar</button>
+                <a href="/listar" class="ms-auto btn btn-dark fw-bold">&lt;- Voltar</a>
+            </div>
+        </form>
+        
+    </div>
+
+</div>
+
+{% endblock %}
+```
+

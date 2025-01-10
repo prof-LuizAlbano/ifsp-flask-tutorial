@@ -1,0 +1,56 @@
+{% extends 'base.html' %}
+
+{% block page_title %}
+Formulário
+{% endblock %}
+
+{% block page_content %}
+
+<div class="container-fluid py-4">
+    <div class="d-flex align-self-center">
+        <h1>Adicionar/Editar Contato</h1>
+        <a href="/listar" class="ms-auto py-3 btn btn-dark fw-bold">&lt;- Voltar</a>
+    </div>
+
+    <div class="row py-5">
+        <form action="#" method="post">
+            <div class="row mb-3">
+                <label for="form_input_Nome" class="col-sm-2 col-form-label">Nome</label>
+                <div class="col-sm-10">
+                    <input type="text" class="form-control" id="form_input_Nome">
+                </div>
+            </div>
+
+            <div class="row mb-3">
+                <label for="form_input_Telefone" class="col-sm-2 col-form-label">Telefone</label>
+                <div class="col-sm-10">
+                    <input type="text" class="form-control" id="form_input_Telefone">
+                </div>
+            </div>
+
+            <div class="row mb-3">
+                <label for="form_input_DataNascimento" class="col-sm-2 col-form-label">Data de Nascimento</label>
+                <div class="col-sm-10">
+                    <input type="text" class="form-control" id="form_input_DataNascimento">
+                </div>
+            </div>
+
+            <div class="row mb-3">
+                <label for="form_input_Email" class="col-sm-2 col-form-label">Email</label>
+                <div class="col-sm-10">
+                    <input type="email" class="form-control" id="form_input_Email">
+                </div>
+            </div>
+
+            <div class="d-flex">
+                <label class="col-sm-2 ms-1 col-form-label">&nbsp;</label>
+                <button type="submit" class="btn btn-success">Salvar</button>
+                <a href="/listar" class="ms-auto btn btn-dark fw-bold">&lt;- Voltar</a>
+            </div>
+        </form>
+        
+    </div>
+
+</div>
+
+{% endblock %}

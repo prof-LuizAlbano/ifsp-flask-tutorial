@@ -13,6 +13,15 @@ Lista de Contatos
     </div>
 
     <div class="row py-5">
+
+        {% if get_flashed_messages() %}
+        <div class="alert alert-info">
+            {% for message in get_flashed_messages() %}
+                {{ message }}
+            {% endfor %}
+        </div>
+        {% endif %}
+
         <table class="table table-hover table-striped ">
             <thead>
                 <tr>
@@ -25,18 +34,21 @@ Lista de Contatos
                 </tr>
             </thead>
             <tbody>
+
+                {% for row in rows %}
                 <tr>
-                    <td>0</td>
-                    <td>Nome do contato</td>
-                    <td>(00) 0000-0000</td>
-                    <td>00/00/0000</td>
-                    <td>nome@provedor.com.br</td>
+                    <td>{{ row['id'] }}</td>
+                    <td>{{ row['nome'] }}</td>
+                    <td>{{ row['telefone'] }}</td>
+                    <td>{{ row['data_nascimento'] }}</td>
+                    <td>{{ row['email'] }}</td>
                     <td>
-                        <a href="/visualizar/0" class="text-dark">Visualizar</a> |
-                        <a href="/editar/0" class="text-dark">Editar</a> |
-                        <a href="/excluir/0" class="text-danger delete-item">Excluir</a>
+                        <a href="/visualizar/{{ row['id'] }}" class="text-dark">Visualizar</a> |
+                        <a href="/editar/{{ row['id'] }}" class="text-dark">Editar</a> |
+                        <a href="/excluir/{{ row['id'] }}" class="text-danger delete-item">Excluir</a>
                     </td>
                 </tr>
+                {% endfor %}
             </tbody>
         </table>
     </div>

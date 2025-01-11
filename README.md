@@ -120,7 +120,7 @@ Para o desenvolvimento desta aplicação vamos criar um banco de dados baseado n
 DROP TABLE IF EXISTS contatos;
 
 CREATE TABLE contatos (
-  id INT AUTO_INCREMENT PRIMARY KEY,
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
   nome VARCHAR(50) NOT NULL,
   telefone VARCHAR(20),
   data_nascimento DATE,
@@ -483,50 +483,50 @@ Visualização de dados
 
 **Conteúdo do arquivo formulario-contato.html:**
 
-Este arquivo será utilizado tanto para a rota de adicionar, quanto para a rota de editar, pois se utilizam do mesmo formulário de campos.
+Este arquivo será utilizado tanto para a rota de adicionar, quanto para a rota de editar, pois se utilizam do mesmo formulário de campos. Ao longo do tutorial iremos explicar alguns detalhes deste formulário.
 
 ```
 {% extends 'base.html' %}
 
 {% block page_title %}
-Formulário
+{{title}}
 {% endblock %}
 
 {% block page_content %}
 
 <div class="container-fluid py-4">
     <div class="d-flex align-self-center">
-        <h1>Adicionar/Editar Contato</h1>
+        <h1>{{title}}</h1>
         <a href="/listar" class="ms-auto py-3 btn btn-dark fw-bold">&lt;- Voltar</a>
     </div>
 
     <div class="row py-5">
-        <form action="#" method="post">
+        <form action="" method="post">
             <div class="row mb-3">
                 <label for="form_input_Nome" class="col-sm-2 col-form-label">Nome</label>
                 <div class="col-sm-10">
-                    <input type="text" class="form-control" id="form_input_Nome">
+                    <input type="text" class="form-control" id="form_input_Nome" required="required" name="nome" value="{{ dados['nome'] }}">
                 </div>
             </div>
 
             <div class="row mb-3">
                 <label for="form_input_Telefone" class="col-sm-2 col-form-label">Telefone</label>
                 <div class="col-sm-10">
-                    <input type="text" class="form-control" id="form_input_Telefone">
+                    <input type="text" class="form-control phone-mask" id="form_input_Telefone" name="telefone" required="required" value="{{ dados['telefone'] }}" placeholder="(XX) XXXXX-XXXX">
                 </div>
             </div>
 
             <div class="row mb-3">
                 <label for="form_input_DataNascimento" class="col-sm-2 col-form-label">Data de Nascimento</label>
                 <div class="col-sm-10">
-                    <input type="text" class="form-control" id="form_input_DataNascimento">
+                    <input type="text" class="form-control date-mask" id="form_input_DataNascimento" name="data_nascimento" required="required" value="{{ dados['data_nascimento'] }}" placeholder="DD/MM/YYYY">
                 </div>
             </div>
 
             <div class="row mb-3">
                 <label for="form_input_Email" class="col-sm-2 col-form-label">Email</label>
                 <div class="col-sm-10">
-                    <input type="email" class="form-control" id="form_input_Email">
+                    <input type="email" class="form-control" id="form_input_Email" required="required" name="email" value="{{ dados['email'] }}">
                 </div>
             </div>
 
@@ -636,3 +636,246 @@ def editar_contato(id_contato):
 def excluir_contato(id_contato):
     return f"<h1>Excluir Contato: {id_contato}</h1>"
 ```
+
+## 7. Banco de Dados
+
+Chegamos agora à parte em que faremos a integração da nossa aplicação com os dados que estão armazenados no banco de dados. Nossa aplicação fará operações de leitura e escrita no banco de dados.
+
+Vamos utilizar o banco de dados SQLite devido a sua facilidade de configuração e manipulação, sem a necessidade de instalarmos e configurarmos um serviço a parte e pela aplicação ser uma aplicação pequena.
+
+Na seção 2 deste tutorial, apresentamos os passos para a criação do banco de dados, portanto presumimos que o banco de dados já tenha sido criado em sua aplicação.
+
+Para facilitar nosso trabalho e reutilizarmos códigos, evitando a sobrescrita de códigos, vamos criar uma classe que nos auxiliará com métodos para as operações necessárias com banco de dados. Para isto vamos criar um arquivo, na raíz do projeto, chamado **`db.py`**.
+
+Toda vez que uma requisição for recebida e tivermos a necessidade de trabalhar com banco de dados, temos a necessidade de criar um objeto que mantém a conexão com o banco. Ao final das operações, devemos fechar esta conexão. Além disso, também temos operações de consulta e manipulação dos dados retornados, além de operações para inserir ou editar dados. Nossa classe irá abranger estas operações básicas.
+
+Arquivo **`db.py`**:
+
+```
+import sqlite3
+
+class DB:
+    connection = None
+
+    def connect(self):
+        self.connection = sqlite3.connect('db/agenda.db')
+        self.connection.row_factory = sqlite3.Row
+
+    def close(self):
+        self.connection.close()
+
+    def read(self, sql):
+        if self.connection == None:
+            self.connect()
+
+        cursor = self.connection.execute(sql)
+        return cursor.fetchall()
+
+    def write(self, sql, values):
+        if self.connection == None:
+            self.connect()
+
+        self.connection.execute(sql, values)
+        self.connection.commit()
+```
+
+Teremos que realizar algumas alterações no arquivo **`app.py`**, para adicionar algumas novas bibliotecas que iremos utilizar, como: **redirect** (utilizada para redirecionar requisições dentro dos comandos Python), **url_for** (para remontar a URL de uma função), **flash** (grava mensagens entre requisições) e a inclusão da biblioteca de manipulação do banco de dados que criamos anteriormente.
+
+As linhas iniciais do arquivo ficarão assim:
+
+```
+from flask import Flask
+from flask import render_template, request, redirect, url_for, flash
+from db import DB
+
+app = Flask(__name__)
+app.secret_key = b'\xa0\xdd\x8b\xe05\x00\tP\xb7\x94_\xe9'
+```
+
+A entrada **`app.secret_key`** é necessária para utilização das mensagens flash.
+
+Vamos agora alterar as rotas para inserir as ações que envolvem o banco de dados. A primeira que iremos alterar é a rota **`/`** ou **`/listar`**. Nesta rota, temos que realizar uma consulta ao banco de dados para obter o conjunto de registros e exibí-los ao usuário.
+
+```
+@app.route("/")
+@app.route("/listar")
+def listar_contatos():
+    conn = DB()
+    rows = conn.read("SELECT id, nome, telefone, data_nascimento, email FROM contatos ORDER BY nome")
+    conn.close()
+    return render_template("listar-contatos.html", rows=rows)
+```
+
+No trecho acima a variável **conn** é nosso objeto para manipulação com o banco de dados. Na sequência, adicionamos uma variável chamada **rows** que receberá o conjunto de dados do banco de dados, consultados a partir da string SQL declarada como parâmetro do método **read()**. O resultado obtido após a consulta é passado ao template, através do parâmetro que chamamos de **rows** também.
+
+Feita a alteração no arquivo **`app.py`**, agora temos que alterar o arquivo **`listar-contatos.html`**:
+
+```
+    <div class="row py-5">
+
+        {% if get_flashed_messages() %}
+        <div class="alert alert-info">
+            {% for message in get_flashed_messages() %}
+                {{ message }}
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <table class="table table-hover table-striped ">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Nome</th>
+                    <th>Telefone</th>
+                    <th>Data de Nascimento</th>
+                    <th>E-mail</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+
+                {% for row in rows %}
+                <tr>
+                    <td>{{ row['id'] }}</td>
+                    <td>{{ row['nome'] }}</td>
+                    <td>{{ row['telefone'] }}</td>
+                    <td>{{ row['data_nascimento'] }}</td>
+                    <td>{{ row['email'] }}</td>
+                    <td>
+                        <a href="/visualizar/{{ row['id'] }}" class="text-dark">Visualizar</a> |
+                        <a href="/editar/{{ row['id'] }}" class="text-dark">Editar</a> |
+                        <a href="/excluir/{{ row['id'] }}" class="text-danger delete-item">Excluir</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+```
+
+Neste arquivo incluímos um trecho de código referente à exibição de mensagens do tipo **flash()**. Utilizaremos isto para exibir mensagens de feedback ao usuário. Também foi alterado o trecho que exibe as linhas de resultado. Criamos um bloco de repetições **`{% for row in rows %}`** e em cada célula alteramos o texto de marcação para o dado do banco de dados a ser exibido, exemplo: **`{{ row['nome'] }}`**.
+
+A próxima rota a ser ajustada é a **/visualizar**. Nesta rota, devemos consultar o banco de dados para recuperar a informação do registro, passado na URL através da variável **id_contato**. Após recuperar o registro este é repassado ao template para exibição dos dados.
+
+```
+@app.route("/visualizar/<int:id_contato>")
+def visualizar_contato(id_contato):
+    conn = DB()
+    #Recuperamos os dados do registro a ser editado
+    record = conn.read_one(f"SELECT * FROM contatos WHERE id={id_contato}")
+    conn.close()
+
+    return render_template("visualizar-contato.html", dados=record)
+```
+
+E o arquivo **`visualizar-contato.html`**, alterar as linhas abaixo:
+
+```
+        <table class="table table-hover table-striped ">
+            <tbody>
+                <tr>
+                    <th width="200">#</th>
+                    <td>{{ dados['id'] }}</td>
+                </tr>
+                <tr>
+                    <th>Nome</th>
+                    <td>{{ dados['nome'] }}</td>
+                </tr>
+                <tr>
+                    <th>Telefone</th>
+                    <td>{{ dados['telefone'] }}</td>
+                </tr>
+                <tr>
+                    <th>Data de Nascimento</th>
+                    <td>{{ dados['data_nascimento'] }}</td>
+                </tr>
+                <tr>
+                    <th>E-mail</th>
+                    <td>{{ dados['email'] }}</td>
+                </tr>
+                <tr>
+                    <th>Data de Cadastro</th>
+                    <td>{{ dados['data_cadastro'] }}</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div class="d-flex">
+            <a href="/editar/{{ dados['id'] }}" class="btn btn-success">Editar</a>
+            <a href="/excluir/{{ dados['id'] }}" class="btn btn-danger ms-2 delete-item">Excluir</a>
+            <a href="/listar" class="ms-auto btn btn-dark fw-bold">&lt;- Voltar</a>
+        </div>
+```
+
+Na sequência, vamos ajustar a rota **/adicionar**. Nesta rota, devemos verificar se recebemos uma requisição do tipo POST, quando o usuário envia o formulário. Neste caso, devemos obter os dados e salvá-los no banco de dados.
+
+```
+@app.route("/adicionar", methods=['POST', 'GET'])
+def adicionar_contato():
+    if request.method == 'POST':
+        sql = "INSERT INTO contatos (nome, telefone, data_nascimento, email) VALUES (?, ?, ?, ?)"
+
+        conn = DB()
+        conn.write(sql, (
+            request.form['nome'], 
+            request.form['telefone'], 
+            request.form['data_nascimento'],
+            request.form['email']
+        ))
+        conn.close()
+
+        flash("Contato adicionado com sucesso!")
+        return redirect(url_for('listar_contatos'))
+
+    return render_template("formulario-contato.html", title="Adicionar Contato", form_action="/adicionar", dados=None)
+```
+
+Em seguida vamos alterar a rota **/editar**. Aqui temos que recuperar o registro que será editado. O mesmo é repassado ao template através da variável dados. Assim como na rota anterior, verificamos se recebemos uma requisição do tipo POST, e quando recebida, temos que alterar os dados no banco de dados.
+
+```
+@app.route("/editar/<int:id_contato>", methods=['POST', 'GET'])
+def editar_contato(id_contato):
+    conn = DB()
+
+    #Recuperamos os dados do registro a ser editado
+    record = conn.read_one(f"SELECT * FROM contatos WHERE id={id_contato}")
+
+    if request.method == 'POST':
+        conn.write("UPDATE contatos SET nome=?, telefone=?, data_nascimento=?, email=? WHERE id=?", (
+            request.form['nome'],
+            request.form['telefone'],
+            request.form['data_nascimento'],
+            request.form['email'], 
+            id_contato
+        ))
+
+        flash("Contato editado com sucesso!")
+        return redirect(url_for('listar_contatos'))
+
+    conn.close()
+    return render_template("formulario-contato.html", title="Editar Contato", dados=record)
+```
+
+No arquivo de template não faremos alterações, pois em seções anteriores já exibimos a versão final. No formulário os detalhes importantes são:
+* **{{title}}**: indica o título da página, que se alterna quando a ação é para adicionar um novo contato ou quando estamos editando;
+* Propriedade **name=""**: indica o nome da variável para obtenção dos dados
+* Propriedades **value=""**: valor exibido quando estamos editando o formulários
+* Classes **.phone-mask** e **.date-mask**: indica que o campo conterá uma máscara para digitação dos dados do tipo telefone e data respectivamente. Estas máscaras são adicionadas através de instruções javascript. 
+
+Finalizando, vamos editar a rota **/excluir**. Nesta rota fazemos a exclusão de um registro no banco de dados e posteriormente, redirecionamos o usuário para a listagem de dados exibindo uma mensagem de feedback.
+
+```
+@app.route("/excluir/<int:id_contato>")
+def excluir_contato(id_contato):
+    if id_contato > 0:
+        conn = DB()
+        conn.write("DELETE FROM contatos WHERE id=?", (id_contato, ))
+        conn.close
+        flash("Contato removido com sucesso!")
+        return redirect(url_for('listar_contatos'))
+
+    flash("Contato não removido!")
+    return redirect(url_for('listar_contatos'))
+```
+
+Pronto. Realizadas alterações, podemos realizar os testes das funcionalidades da nossa aplicação, inserindo, editando, visualizando e excluindo dados.

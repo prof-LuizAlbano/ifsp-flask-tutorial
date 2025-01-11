@@ -1,7 +1,7 @@
 DROP TABLE IF EXISTS contatos;
 
 CREATE TABLE contatos (
-  id INT AUTO_INCREMENT PRIMARY KEY,
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
   nome VARCHAR(50) NOT NULL,
   telefone VARCHAR(20),
   data_nascimento DATE,
